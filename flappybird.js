@@ -47,6 +47,8 @@ let lastSpeedUpdateScore = 0; //it checks score update for every frame.
 let timeSinceLastPipe = 0;
 let pipeDistance = 200; // the distance betwen pipes 
 
+
+
 window.onload = function (){
   board = document.getElementById("board");
   board.height = boardHeight;
@@ -70,9 +72,23 @@ window.onload = function (){
   bottomPipeImg = new Image();
   bottomPipeImg.src = "./bottompipe.png";
   
-  requestAnimationFrame(update);
+  
   //pipeTimer = setInterval(placePipes, pipeInterval); //every 1.5 seconds
   document.addEventListener("keydown", moveBird);
+
+  document.getElementById('start-screen').addEventListener('click', ()=>{
+    document.getElementById('start-screen').style.display = "none";
+    board.style.display = "block";
+    document.getElementById('instruction-screen').style.display = "flex";
+    //board.style.display ="block";
+  })
+
+  document.getElementById('instruction-screen').addEventListener('click', ()=>{
+    document.getElementById('instruction-screen').style.display = "none";
+    requestAnimationFrame(update);
+  })
+
+  
 }
 
 function update() {
@@ -152,6 +168,9 @@ function update() {
   //Draw game over message
   if(gameOver){
     context.fillText("GAME OVER", 5, 90);
+
+
+    return;
   }
 
   
@@ -195,15 +214,16 @@ function placePipes(){
 
 function moveBird(e) {
   if(e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX"){
+    if(gameOver){
+      document.getElementById("instruction-screen").style.display ="flex";
+    }
     velocityY = -6;
 
     //reset game
     if(gameOver){
-      bird.y = birdY;
-      pipeArray = [];
-      score = 0;
-      gameOver = false;
-      velocityX = -2;
+      resetGame()
+      
+
     }
   }
 }
@@ -213,4 +233,12 @@ function detectCollision(a,b){
          a.x + a.width > b.x &&
          a.y < b.y + b.height &&
          a.y + a.height > b.y;
+}
+
+function resetGame(){
+  bird.y = birdY;
+  pipeArray = [];
+  score = 0;
+  gameOver = false;
+  velocityX = -2;
 }
