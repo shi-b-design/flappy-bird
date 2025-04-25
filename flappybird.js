@@ -41,13 +41,12 @@ let gravity = 0.4; // how fast bird is pulling down every time
 let gameOver = false;
 let score = 0;
 let lastSpeedUpdateScore = 0; //it checks score update for every frame. 
-//let pipeInterval = 1500;
-//let pipeTimer;
+
 
 let timeSinceLastPipe = 0;
 let pipeDistance = 200; // the distance betwen pipes 
 
-
+let waitingRestart = false;
 
 window.onload = function (){
   board = document.getElementById("board");
@@ -214,18 +213,28 @@ function placePipes(){
 
 function moveBird(e) {
   if(e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX"){
-    if(gameOver){
-      document.getElementById("instruction-screen").style.display ="flex";
-    }
     velocityY = -6;
-
     //reset game
     if(gameOver){
-      resetGame()
-      
-
+      refleshScreen(e);
     }
   }
+}
+
+function refleshScreen(e){
+  if(e.code === "Space" && !waitingRestart){
+    document.getElementById("instruction-screen").style.display = "flex";
+    waitingRestart = true; 
+    return;
+
+  }
+
+  if(e.code === "Space" && waitingRestart){
+    document.getElementById("instruction-screen").style.display = "none";
+    waitingRestart = false;
+    resetGame();
+  }
+
 }
 
 function detectCollision(a,b){
