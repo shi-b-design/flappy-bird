@@ -1,4 +1,3 @@
-
 //board
 
 // set up rectangular game area (like a piece of paper) where everything is drawn. 
@@ -41,7 +40,8 @@ let gravity = 0.4; // how fast bird is pulling down every time
 let gameOver = false;
 let score = 0;
 let lastSpeedUpdateScore = 0; //it checks score update for every frame. 
-
+let gameLoop = null; // Add this line to track the animation frame
+let isGameRunning = false; // Add flag to track if game is running
 
 let timeSinceLastPipe = 0;
 let pipeDistance = 200; // the distance betwen pipes 
@@ -84,15 +84,19 @@ window.onload = function (){
 
   document.getElementById('instruction-screen').addEventListener('click', ()=>{
     document.getElementById('instruction-screen').style.display = "none";
-    requestAnimationFrame(update);
+    isGameRunning = true;
+    resetGame();
   })
 
   
 }
 
 function update() {
-  requestAnimationFrame(update);
-  if (gameOver){
+  if (!isGameRunning) return;
+  
+  gameLoop = requestAnimationFrame(update);
+  if (gameOver) {
+    isGameRunning = false;
     return;
   }
 
@@ -135,8 +139,7 @@ function update() {
         //pipeTimer = setInterval(placePipes, pipeInterval); // you set the new timer 
        
         lastSpeedUpdateScore = Math.floor(score)
-       }
-       
+       }   
     }
 
     if(detectCollision(bird,pipe)){
@@ -167,12 +170,9 @@ function update() {
   //Draw game over message
   if(gameOver){
     context.fillText("GAME OVER", 5, 90);
-
-
     return;
   }
 
-  
 }
 
 function placePipes(){
@@ -222,18 +222,24 @@ function moveBird(e) {
 }
 
 function refleshScreen(e){
-  if(e.code === "Space" && !waitingRestart){
+  if (e.code === "Space" && !waitingRestart) {
     document.getElementById("instruction-screen").style.display = "flex";
-    waitingRestart = true; 
+    waitingRestart = true;
+    isGameRunning = false; // Stop the game loop
+    if (gameLoop) {
+      cancelAnimationFrame(gameLoop);
+      gameLoop = null;
+    }
     return;
-
   }
 
-  if(e.code === "Space" && waitingRestart){
+  if (e.code === "Space" && waitingRestart) {
     document.getElementById("instruction-screen").style.display = "none";
     waitingRestart = false;
     resetGame();
+    return;
   }
+  
 
 }
 
@@ -245,9 +251,23 @@ function detectCollision(a,b){
 }
 
 function resetGame(){
+  // Stop the current game loop
+  if (gameLoop) {
+    cancelAnimationFrame(gameLoop);
+    gameLoop = null;
+  }
+  
+  // Reset all game state
   bird.y = birdY;
   pipeArray = [];
   score = 0;
   gameOver = false;
   velocityX = -2;
+  velocityY = 0;
+  lastSpeedUpdateScore = 0;
+  timeSinceLastPipe = 0;
+  
+  // Start new game
+  isGameRunning = true;
+  update();
 }
