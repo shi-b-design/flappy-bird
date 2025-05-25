@@ -6,7 +6,6 @@ let boardWidth = 360;
 let boardHeight = 640;
 let context;
 
-
 //bird
 let birdWidth = 34; //width/height ratio = 408/228 = 17/12
 let birdHeight = 24;
@@ -75,29 +74,47 @@ window.onload = function (){
   //pipeTimer = setInterval(placePipes, pipeInterval); //every 1.5 seconds
   document.addEventListener("keydown", moveBird);
 
+  // Start screen
   document.getElementById('start-screen').addEventListener('click', ()=>{
     document.getElementById('start-screen').style.display = "none";
     board.style.display = "block";
     document.getElementById('instruction-screen').style.display = "flex";
-    //board.style.display ="block";
   })
 
+  // Instruction screen
   document.getElementById('instruction-screen').addEventListener('click', ()=>{
     document.getElementById('instruction-screen').style.display = "none";
     isGameRunning = true;
     resetGame();
   })
 
-  
+  // Game over screen buttons
+  document.getElementById('restart-button').addEventListener('click', () => {
+    document.getElementById('game-over-screen').style.display = "none";
+    document.getElementById('instruction-screen').style.display = "flex";
+  });
+
+  document.getElementById('quit-button').addEventListener('click', () => {
+    document.getElementById('game-over-screen').style.display = "none";
+    document.getElementById('start-screen').style.display = "flex";
+    if (gameLoop) {
+      cancelAnimationFrame(gameLoop);
+      gameLoop = null;
+    }
+    isGameRunning = false;
+  });
 }
 
 function update() {
+  // Check if the game is running, and this is essential because if the game is not running, the game should not have update. 
+
   if (!isGameRunning) return;
   
   gameLoop = requestAnimationFrame(update);
   if (gameOver) {
     isGameRunning = false;
-    return;
+    showGameOverScreen();
+    return; 
   }
 
   // Before drawing the next frame, erase everything from previous one.
@@ -120,7 +137,6 @@ function update() {
     pipe.x += velocityX;
     context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
 
-    
     
     // scoring logic
     if(!pipe.passed && bird.x > pipe.x + pipe.width){
@@ -215,32 +231,34 @@ function moveBird(e) {
   if(e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX"){
     velocityY = -6;
     //reset game
-    if(gameOver){
-      refleshScreen(e);
+
+    // Check which screen is currently visible and handle transitions
+    if(document.getElementById('start-screen').style.display === "flex"){
+      document.getElementById('start-screen').style.display = "none";
+      document.getElementById('instruction-screen').style.display = "flex";
+
+    }
+
+    else if(document.getElementById('instruction-screen').style.display === "flex"){
+      document.getElementById('instruction-screen').style.display = "none";
+      isGameRunning = true; 
+      resetGame(); 
+    }
+
+    else if(gameOver){
+      document.getElementById('game-over-screen').style.display = "none";
+      document.getElementById('instruction-scren').style.display="flex";
     }
   }
 }
 
-function refleshScreen(e){
-  if (e.code === "Space" && !waitingRestart) {
-    document.getElementById("instruction-screen").style.display = "flex";
-    waitingRestart = true;
-    isGameRunning = false; // Stop the game loop
-    if (gameLoop) {
-      cancelAnimationFrame(gameLoop);
-      gameLoop = null;
-    }
-    return;
-  }
-
-  if (e.code === "Space" && waitingRestart) {
-    document.getElementById("instruction-screen").style.display = "none";
-    waitingRestart = false;
+function refleshScreen(e) {
+  // This function can be removed or kept for keyboard controls if desired
+  if (e.code === "Space" && gameOver) {
+    document.getElementById('game-over-screen').style.display = "none";
+    isGameRunning = true;
     resetGame();
-    return;
   }
-  
-
 }
 
 function detectCollision(a,b){
@@ -248,6 +266,11 @@ function detectCollision(a,b){
          a.x + a.width > b.x &&
          a.y < b.y + b.height &&
          a.y + a.height > b.y;
+}
+
+function showGameOverScreen() {
+  document.getElementById('final-score').textContent = Math.floor(score);
+  document.getElementById('game-over-screen').style.display = "flex";
 }
 
 function resetGame(){
