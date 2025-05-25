@@ -1,0 +1,27 @@
+{
+  "name": "flappy-bird",
+  "version": "1.0.0",
+  "main": "flappybird.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shi-b-design/flappy-bird.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shi-b-design/flappy-bird/issues"
+  },
+  "homepage": "https://github.com/shi-b-design/flappy-bird#readme",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.0"
+  }
+}
