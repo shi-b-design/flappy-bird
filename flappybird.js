@@ -247,7 +247,7 @@ function moveBird(e) {
 
     else if(gameOver){
       document.getElementById('game-over-screen').style.display = "none";
-      document.getElementById('instruction-scren').style.display="flex";
+      document.getElementById('instruction-screen').style.display = "flex";
     }
   }
 }
@@ -268,8 +268,35 @@ function detectCollision(a,b){
          a.y + a.height > b.y;
 }
 
-function showGameOverScreen() {
-  document.getElementById('final-score').textContent = Math.floor(score);
+async function showGameOverScreen() {
+  const finalScore = Math.floor(score);
+  document.getElementById('final-score').textContent = finalScore;
+
+  try {
+    // Save score to server
+    const response = await fetch('http://localhost:3000/api/scores', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        score: finalScore,
+        player_name: 'Player' // Default player name
+      })
+    });
+
+    // Get and display high score
+    const highScoreResponse = await fetch('http://localhost:3000/api/scores');
+    const highScore = await highScoreResponse.json();
+    
+    if (highScore && highScore.length > 0) {
+      document.getElementById('final-score').textContent = highScore[0].score;
+    }
+    
+  } catch (error) {
+    console.error('Error saving score:', error);
+  }
+
   document.getElementById('game-over-screen').style.display = "flex";
 }
 
